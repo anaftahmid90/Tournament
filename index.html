@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Hub Pro - Master Engine</title>
+    <style>
+        :root {
+            --primary: #006b3c;
+            --secondary: #1a1a1a;
+            --light: #f4f6f9;
+            --white: #ffffff;
+            --danger: #d9534f;
+            --success: #5cb85c;
+            --warning: #f0ad4e;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--secondary);
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary), #004d2c);
+            color: var(--white);
+            text-align: center;
+            padding: 20px 10px;
+        }
+        header h1 { margin: 0; font-size: 26px; }
+        .container {
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .card h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 10px;
+            color: var(--primary);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover { background-color: #00542f; }
+        .table-responsive { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th { background-color: var(--primary); color: var(--white); }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .penalty-box {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: none;
+        }
+        .active { display: block !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>⚽ Football Hub - Master Tournament Dashboard</h1>
+    <p>আপনার কাস্টম কন্ট্রোল প্যানেল (সম্পূর্ণ খালি ও ডাইনামিক)</p>
+</header>
+
+<div class="container">
+
+    <!-- ১. টুর্নামেন্ট কনফিগারেশন -->
+    <div class="card">
+        <h2>⚙️ টুর্নামেন্ট সেটিংস (Type & Structure)</h2>
+        <div class="grid">
+            <div>
+                <label for="tourName">টুর্নামেন্টের নাম:</label>
+                <input type="text" id="tourName" placeholder="উদা: Weekly Mini School Cup 2026">
+            </div>
+            <div>
+                <label for="tourType">টুর্নামেন্টের ধরন:</label>
+                <select id="tourType">
+                    <option value="League">রাউন্ড রবিন লিগ (Direct Table)</option>
+                    <option value="GroupKnockout">গ্রুপ পর্ব + নকআউট (Group A & B)</option>
+                    <option value="Knockout">সরাসরি নকআউট / কাপ</option>
+                </select>
+            </div>
+            <div>
+                <label for="winPoints">জয়ের পয়েন্ট (Points for Win):</label>
+                <input type="number" id="winPoints" value="3">
+            </div>
+        </div>
+    </div>
+
+    <!-- ২. কাস্টম টিম এবং প্লেয়ার ক্রিয়েশন গ্রুপ সহ -->
+    <div class="card">
+        <h2>👥 টিম ও প্লেয়ার এন্ট্রি (Position & Group)</h2>
+        <div class="grid">
+            <div>
+                <label for="newTeamName">নতুন টিমের নাম:</label>
+                <input type="text" id="newTeamName" placeholder="টিমের নাম লিখুন">
+            </div>
+            <div>
+                <label for="teamGroup">গ্রুপ (Group Assigned):</label>
+                <select id="teamGroup">
+                    <option value="Group A">Group A</option>
+                    <option value="Group B">Group B</option>
+                </select>
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+                <button onclick="createNewTeam()">টিম যোগ করুন</button>
+            </div>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        <div class="grid">
+            <div>
+                <label for="newPlayerName">প্লেয়ারের নাম:</label>
+                <input type="text" id="newPlayerName" placeholder="প্লেয়ারের নাম লিখুন">
+            </div>
+            <div>
+                <label for="playerPos">পজিশন (Position):</label>
+                <select id="playerPos">
+                    <option value="Forward">Forward (FW)</option>
+                    <option value="Midfielder">Midfielder (MF)</option>
+                    <option value="Defender">Defender (DF)</option>
+                    <option value="Goalkeeper">Goalkeeper (GK)</option>
+                </select>
+            </div>
+            <div>
+                <label for="playerBelongsTeam">কোন টিমের প্লেয়ার?:</label>
+                <select id="playerBelongsTeam"><option value="">আগে টিম তৈরি করুন</option></select>
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+                <button onclick="createNewPlayer()">প্লেয়ার যোগ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ৩. লাইভ ম্যাচ কন্ট্রোলার ও অল-ইন-ওয়ান স্ট্যাটস সাবমিশন -->
+    <div class="card">
+        <h2>⏱️ ম্যাচ রেজাল্ট, শুটআউট ও ব্যক্তিগত পারফরম্যান্স ইনপুট</h2>
+        <div class="grid">
+            <div>
+                <label for="matchTeamA">দল A (Home):</label>
+                <select id="matchTeamA" onchange="updateMatchPlayerDropdowns()"></select>
+            </div>
+            <div>
+                <label for="scoreA">স্কোর A:</label>
+                <input type="number" id="scoreA" value="0" min="0" onchange="checkPenaltyVisibility()">
+            </div>
+            <div>
+                <label for="scoreB">স্কোর B:</label>
+                <input type="number" id="scoreB" value="0" min="0" onchange="checkPenaltyVisibility()">
+            </div>
+            <div>
+                <label for="matchTeamB">দল B (Away):</label>
+                <select id="matchTeamB" onchange="updateMatchPlayerDropdowns()"></select>
+            </div>
+        </div>
+
+        <!-- কাস্টম টাইব্রেকার / পেনাল্টি শুটআউট সেকশন -->
+        <div id="penaltyBox" class="penalty-box">
+            <label style="color: #856404; font-weight: bold;">🎯 পেনাল্টি শুটআউট (Tie-Breaker Data):</label>
+            <div class="grid" style="margin-top: 5px;">
+                <div>
+                    <label for="penScoreA">পেনাল্টি স্কোর A:</label>
+                    <input type="number" id="penScoreA" value="0" min="0">
+                </div>
+                <div>
+                    <label for="penScoreB">পেনাল্টি স্কোর B:</label>
+                    <input type="number" id="penScoreB" value="0" min="0">
+                </div>
+            </div>
+        </div>
+
+        <!-- ম্যাচ ইভেন্ট ও ট্রফি কাউন্টার -->
+        <div class="grid" style="margin-top: 15px;">
+            <div>
+                <label for="evtScorer">গোল স্কোরের তালিকা:</label>
+                <select id="evtScorer"><option value="">সিলেক্ট প্লেয়ার</option></select>
+                <input type="number" id="evtGoals" placeholder="গোল সংখ্যা" min="1" value="1" style="margin-top: 5px;">
+            </div>
+            <div>
+                <label for="evtAssister">অ্যাসিস্ট কে করেছে?:</label>
+                <select id="evtAssister"><option value="">সিলেক্ট প্লেয়ার</option></select>
+            </div>
+            <div>
+                <label for="evtMom">ম্যান অব দ্য ম্যাচ (MOM):</label>
+                <select id="evtMom"><option value="">সিলেক্ট প্লেয়ার</option></select>
+            </div>
+            <div>
+                <label for="evtGk">সেরা গোলকিপার (Best GK):</label>
+                <select id="evtGk"><option value="">সিলেক্ট প্লেয়ার</option></select>
+            </div>
+        </div>
+
+        <button onclick="processMatchData()" style="margin-top: 15px; background-color: var(--success);">ম্যাচ ডেটা ও টেবিল আপডেট করুন</button>
+    </div>
+
+    <!-- ৪. অটো-আপডেটেড পয়েন্ট টেবিল -->
+    <div class="card">
+        <h2>📊 টুর্নামেন্ট পয়েন্ট টেবিল (Points Table)</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Team</th>
+                        <th>Group</th>
+                        <th>MP</th>
+                        <th>W</th>
+                        <th>D</th>
+                        <th>L</th>
+                        <th>GF</th>
+                        <th>GA</th>
+                        <th>GD</th>
+                        <th>PTS</th>
+                    </tr>
+                </thead>
+                <tbody id="ptsTableBody">
+                    <tr><td colspan="11">কোনো টিম এন্ট্রি করা হয়নি। উপরে টিম যোগ করুন।</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ৫. প্লেয়ার ড্যাশবোর্ড ও টপ স্কোরার/হ্যাটট্রিক ট্র্যাকার -->
+    <div class="card">
+        <h2>🏆 প্লেয়ার লিডারবোর্ড (Top Scorers, Assists & Awards)</h2>
+স্ট্যাটস পয়েন্ট টেবিলে যুক্ত হয়েছে!");
+}
+// ৪. পয়েন্ট টেবিল রেন্ডার
+function renderMainTable() {
+const tbody = document.getElementById("ptsTableBody");
+if(Object.keys(tournamentTeams).length === 0) {
+tbody.innerHTML = <tr><td colspan="11">কোনো টিম এন্ট্রি করা হয়নি।</td></tr>;
+return;
+}
+tbody.innerHTML = "";
+let sorted = Object.keys(tournamentTeams).map(name => ({name, ...tournamentTeams[name]})).sort((a,b) => {
+if(b.pts !== a.pts) return b.pts - a.pts;
+return b.gd - a.gd;
+});
+sorted.forEach((team, index) => {
+tbody.innerHTML += `
+${index + 1}
+${team.name}
+${team.group}
+${team.mp}
+${team.w}
+${team.d}
+${team.l}
+${team.gf}
+${team.ga}
+${team.gd}
+${team.pts}
+`;
+});
+}
+// ৫. লিডারবোর্ড রেন্ডার
+function renderPlayerLeaderboard() {
+const tbody = document.getElementById("playerLeaderboardBody");
+if(tournamentPlayers.length === 0) {
+tbody.innerHTML = <tr><td colspan="8">কোনো প্লেয়ার যোগ করা হয়নি।</td></tr>;
+return;
+}
+tbody.innerHTML = "";
+// গোল অনুযায়ী সর্ট
+let sortedPlayers = [...tournamentPlayers].sort((a,b) => b.goals - a.goals);
+sortedPlayers.forEach(p => {
+tbody.innerHTML += `
+${p.name}
+${p.position}
+${p.team}
+⚽ ${p.goals}
+👟 ${p.assists}
+🎩 ${p.hattricks}
+🥇 ${p.mom}
+🧤 ${p.gkClean}
+`;
+});
+}
+
+
+
+### এই কোডের মূল ডাইনামিক বৈশিষ্ট্যসমূহ:
+* **কোনো নাম আগে থেকে ফিক্সড নেই:** এটি সম্পূর্ণ ব্ল্যাঙ্ক। আপনি নিজেই আপনার রিয়েল-টাইম প্লেয়ারের নাম, টিম এবং পজিশন টাইপ করে যোগ করতে পারবেন।
+* **ডাইনামিক পজিশন ও গ্রুপ সিলেকশন:** প্লেয়ার এন্ট্রি করার সময় সে Forward, Midfielder, Defender নাকি Goalkeeper তা আপনি নিজেই ড্রপডাউন থেকে নির্ধারণ করতে পারবেন।
+* **ম্যাচ ও পেনাল্টি অপশন:** স্কোর টাই হলে পেনাল্টি শুটআউট বক্সটি ডাইনামিক্যালি ওপেন হবে এবং সেখান থেকে আপনি কাস্টম টাইব্রেকার স্কোর ইনপুট দিতে পারবেন।
+* **অটো হ্যাটট্রিক ও লিডারবোর্ড:** গোল বক্সে ৩ বা তার বেশি গোল দিলেই সিস্টেমে হ্যাটট্রিক ট্র্যাকার অন হয়ে যাবে এবং পয়েন্ট টেবিল নিজে নিজেই সর্ট (র‍্যাংক) হবে।
+
+<FollowUp>
+এই মাস্টার ইঞ্জিনে কি আপনার সুবিধার জন্য কোনো **"Reset All Data"** বা ডেটা সম্পূর্ণ মুছে ফেলার বাটন যোগ করার প্রয়োজন আছে? অথবা নকআউট রাউন্ডের জন্য কি কোনো **সেমিফাইনাল/ফাইনাল আলাদা ফিক্সচার ট্র্যাকার** যুক্ত করতে চান?
+</FollowUp>
